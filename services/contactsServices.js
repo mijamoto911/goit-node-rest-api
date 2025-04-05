@@ -18,3 +18,14 @@ export const removeContact = (id) =>
       id,
     },
   });
+export const updateStatusContact = async (id, data) => {
+  const contact = await getContactById(id);
+  if (!contact) return null;
+
+  return contact.update(
+    { favorite: data.favorite },
+    {
+      returning: true,
+    }
+  );
+};
