@@ -22,4 +22,6 @@ contactsRouter.put(
 );
 contactsRouter.delete('/:id', contactsController.deleteContact);
 
+contactsRouter.patch('/:id/favorite', contactsController.updateStatusContact);
+
 export default contactsRouter;
