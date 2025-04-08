@@ -23,6 +23,6 @@ app.use((err, req, res, next) => {
 const { PORT = 3000 } = process.env;
 const port = Number(PORT);
 
-app.listen(PORT, () => {
-  console.log(`✅ Server is running. Use our API on port: ${PORT}`);
+app.listen(port, () => {
+  console.log(`✅ Server is running. Use our API on port: ${port}`);
 });
