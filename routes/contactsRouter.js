@@ -1,7 +1,7 @@
 import express from 'express';
 import contactsController from '../controllers/contactsControllers.js';
 
-import validateBody from '../decorators/validateBody.js';
+import validateBody from '../helpers/validateBody.js';
 import {
   createContactSchema,
   updateContactSchema,

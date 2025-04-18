@@ -4,7 +4,7 @@ import authMiddleware from '../middlewares/authMiddleware.js';
 
 import authControllers from '../controllers/authControllers.js';
 
-import validateBody from '../decorators/validateBody.js';
+import validateBody from '../helpers/validateBody.js';
 
 import { authSignupSchema, authSigninSchema } from '../schemas/authSchemas.js';
 

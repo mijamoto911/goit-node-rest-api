@@ -2,11 +2,11 @@ import * as authServices from '../services/authServices.js';
 import ctrlWrapper from '../decorators/ctrlWrapper.js';
 
 const signupController = async (req, res) => {
-  const { token, user } = await authServices.signupUser(req.body);
+  const { user, token } = await authServices.signupUser(req.body);
 
   res.status(201).json({
-    token,
     user,
+    token,
   });
 };
 

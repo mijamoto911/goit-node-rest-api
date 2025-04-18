@@ -1,6 +1,9 @@
 import bcrypt from 'bcrypt';
+
 import User from '../db/models/users.js';
+
 import HttpError from '../helpers/HttpError.js';
+
 import { generateToken } from '../helpers/jwt.js';
 
 export const findUser = (query) =>
@@ -9,20 +12,32 @@ export const findUser = (query) =>
   });
 
 export const signupUser = async (data) => {
-  const { email, password } = data;
-  const user = await User.findOne({
-    where: {
-      email,
-    },
-  });
+  const { email, password, username } = data;
 
-  if (user) {
+  const userExists = await User.findOne({ where: { email } });
+  if (userExists) {
     throw HttpError(409, 'Email already in use');
   }
 
   const hashPassword = await bcrypt.hash(password, 10);
 
-  return User.create({ ...data, password: hashPassword });
+  const newUser = await User.create({
+    email,
+    password: hashPassword,
+    username,
+  });
+
+  const token = generateToken({ id: newUser.id });
+
+  await newUser.update({ token });
+
+  return {
+    user: {
+      email: newUser.email,
+      subscription: newUser.subscription,
+    },
+    token,
+  };
 };
 
 export const signinUser = async (data) => {
@@ -43,7 +58,7 @@ export const signinUser = async (data) => {
   }
 
   const payload = {
-    email,
+    id: user.id,
   };
 
   const token = generateToken(payload);

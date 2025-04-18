@@ -1,6 +1,7 @@
 import * as contactsService from '../services/contactsServices.js';
 import HttpError from '../helpers/HttpError.js';
 import ctrlWrapper from '../decorators/ctrlWrapper.js';
+import checkNotFound from '../helpers/checkNotFound.js';
 
 const getAllContacts = async (req, res) => {
   const data = await contactsService.listContacts();
@@ -9,10 +10,7 @@ const getAllContacts = async (req, res) => {
 
 const getOneContact = async (req, res) => {
   const { id } = req.params;
-  const data = await contactsService.getContactById(id);
-  if (!data) {
-    throw new HttpError(404, 'Not found');
-  }
+  const data = checkNotFound(await contactsService.getContactById(id));
   res.json(data);
 };
 
@@ -23,19 +21,15 @@ const createContact = async (req, res) => {
 
 const updateContact = async (req, res) => {
   const { id } = req.params;
-  const updated = await contactsService.updateContact(id, req.body);
-  if (!updated) {
-    throw new HttpError(404, 'Not found');
-  }
+  const updated = checkNotFound(
+    await contactsService.updateContact(id, req.body)
+  );
   res.json(updated);
 };
 
 const deleteContact = async (req, res) => {
   const { id } = req.params;
-  const data = await contactsService.removeContact(id);
-  if (!data) {
-    throw new HttpError(404, 'Not found');
-  }
+  const data = checkNotFound(await contactsService.removeContact(id));
   res.status(200).json(data);
 };
 
@@ -47,10 +41,9 @@ const updateStatusContact = async (req, res) => {
     throw new HttpError(400, "Missing or invalid 'favorite' field");
   }
 
-  const updated = await contactsService.updateStatusContact(id, { favorite });
-  if (!updated) {
-    throw new HttpError(404, 'Not found');
-  }
+  const updated = checkNotFound(
+    await contactsService.updateStatusContact(id, { favorite })
+  );
   res.json(updated);
 };
 
