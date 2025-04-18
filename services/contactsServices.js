@@ -12,12 +12,12 @@ export const updateContact = async (id, data) => {
     returning: true,
   });
 };
-export const removeContact = (id) =>
-  User.destroy({
-    where: {
-      id,
-    },
-  });
+export const removeContact = async (id) => {
+  const contact = await getContactById(id);
+  if (!contact) return null;
+  await contact.destroy();
+  return contact;
+};
 export const updateStatusContact = async (id, data) => {
   const contact = await getContactById(id);
   if (!contact) return null;
