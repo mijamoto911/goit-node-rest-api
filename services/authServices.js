@@ -12,7 +12,7 @@ export const findUser = (query) =>
   });
 
 export const signupUser = async (data) => {
-  const { email, password, username } = data;
+  const { email, password } = data;
 
   const userExists = await User.findOne({ where: { email } });
   if (userExists) {
@@ -24,7 +24,6 @@ export const signupUser = async (data) => {
   const newUser = await User.create({
     email,
     password: hashPassword,
-    username,
   });
 
   const token = generateToken({ id: newUser.id });
@@ -42,11 +41,7 @@ export const signupUser = async (data) => {
 
 export const signinUser = async (data) => {
   const { email, password } = data;
-  const user = await User.findOne({
-    where: {
-      email,
-    },
-  });
+  const user = await User.findOne({ where: { email } });
 
   if (!user) {
     throw HttpError(401, 'Email or password invalid');
@@ -57,16 +52,15 @@ export const signinUser = async (data) => {
     throw HttpError(401, 'Email or password invalid');
   }
 
-  const payload = {
-    id: user.id,
-  };
-
-  const token = generateToken(payload);
-
+  const token = generateToken({ id: user.id });
   await user.update({ token });
 
   return {
     token,
+    user: {
+      email: user.email,
+      subscription: user.subscription,
+    },
   };
 };
 

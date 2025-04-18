@@ -3,10 +3,6 @@ import sequelize from '../sequelize.js';
 import { emailRegexp, passwordRegexp } from '../../constants/auth.js';
 
 const User = sequelize.define('user', {
-  username: {
-    type: DataTypes.STRING,
-    allowNull: false,
-  },
   password: {
     type: DataTypes.STRING,
     allowNull: false,
