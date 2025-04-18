@@ -6,15 +6,15 @@ const signupController = async (req, res) => {
 
   res.status(201).json({
     user,
-    token,
   });
 };
 
 const signinController = async (req, res) => {
-  const { token } = await authServices.signinUser(req.body);
+  const { token, user } = await authServices.signinUser(req.body);
 
   res.json({
     token,
+    user,
   });
 };
 const logoutController = async (req, res) => {

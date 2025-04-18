@@ -11,13 +11,13 @@ import { authSignupSchema, authSigninSchema } from '../schemas/authSchemas.js';
 const authRouter = express.Router();
 
 authRouter.post(
-  '/signup',
+  '/register',
   validateBody(authSignupSchema),
   authControllers.signupController
 );
 
 authRouter.post(
-  '/signin',
+  '/login',
   validateBody(authSigninSchema),
   authControllers.signinController
 );
