@@ -1,42 +1,55 @@
 import * as contactsService from '../services/contactsServices.js';
 import HttpError from '../helpers/HttpError.js';
 import ctrlWrapper from '../decorators/ctrlWrapper.js';
+import checkNotFound from '../helpers/checkNotFound.js';
 
 const getAllContacts = async (req, res) => {
-  const data = await contactsService.listContacts();
+  const userId = req.user.id;
+  const data = await contactsService.listContacts(userId);
   res.json(data);
 };
 
 const getOneContact = async (req, res) => {
   const { id } = req.params;
-  const data = await contactsService.getContactById(id);
-  if (!data) {
-    throw new HttpError(404, 'Not found');
-  }
+  const userId = req.user.id;
+  const data = checkNotFound(await contactsService.getContactById(id, userId));
   res.json(data);
 };
 
 const createContact = async (req, res) => {
-  const data = await contactsService.addContact(req.body);
+  const userId = req.user.id;
+  const data = await contactsService.addContact({ ...req.body, owner: userId });
   res.status(201).json(data);
 };
 
 const updateContact = async (req, res) => {
   const { id } = req.params;
-  const updated = await contactsService.updateContact(id, req.body);
-  if (!updated) {
-    throw new HttpError(404, 'Not found');
-  }
+  const userId = req.user.id;
+  const updated = checkNotFound(
+    await contactsService.updateContact(id, req.body, userId)
+  );
   res.json(updated);
 };
 
 const deleteContact = async (req, res) => {
   const { id } = req.params;
-  const data = await contactsService.removeContact(id);
-  if (!data) {
-    throw new HttpError(404, 'Not found');
-  }
+  const userId = req.user.id;
+  const data = checkNotFound(await contactsService.removeContact(id, userId));
   res.status(200).json(data);
+};
+
+const updateStatusContact = async (req, res) => {
+  const { id } = req.params;
+  const { favorite } = req.body;
+  const userId = req.user.id;
+  if (typeof favorite !== 'boolean') {
+    throw new HttpError(400, "Missing or invalid 'favorite' field");
+  }
+
+  const updated = checkNotFound(
+    await contactsService.updateStatusContact(id, { favorite }, userId)
+  );
+  res.json(updated);
 };
 
 export default {
@@ -45,4 +58,5 @@ export default {
   deleteContact: ctrlWrapper(deleteContact),
   createContact: ctrlWrapper(createContact),
   updateContact: ctrlWrapper(updateContact),
+  updateStatusContact: ctrlWrapper(updateStatusContact),
 };
