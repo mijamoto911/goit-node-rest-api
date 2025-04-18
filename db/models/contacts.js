@@ -1,7 +1,8 @@
 import { DataTypes } from 'sequelize';
 import sequelize from '../sequelize.js';
+import User from './users.js';
 
-const User = sequelize.define('contact', {
+const Contact = sequelize.define('contact', {
   name: {
     type: DataTypes.STRING,
     allowNull: false,
@@ -25,8 +26,19 @@ const User = sequelize.define('contact', {
     type: DataTypes.BOOLEAN,
     defaultValue: false,
   },
+  owner: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    references: {
+      model: 'users',
+      key: 'id',
+    },
+    onDelete: 'CASCADE',
+  },
 });
+User.hasMany(Contact, { foreignKey: 'owner' });
+Contact.belongsTo(User, { foreignKey: 'owner' });
 
-// User.sync({ force: true });
+// Contact.sync({ force: true });
 
-export default User;
+export default Contact;
