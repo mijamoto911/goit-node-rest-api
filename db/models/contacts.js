@@ -26,6 +26,10 @@ const Contact = sequelize.define('contact', {
     type: DataTypes.BOOLEAN,
     defaultValue: false,
   },
+  avatarURL: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
   owner: {
     type: DataTypes.INTEGER,
     allowNull: false,
@@ -39,6 +43,6 @@ const Contact = sequelize.define('contact', {
 User.hasMany(Contact, { foreignKey: 'owner' });
 Contact.belongsTo(User, { foreignKey: 'owner' });
 
-//Contact.sync({ force: true });
+//Contact.sync({ alter: true });
 
 export default Contact;
