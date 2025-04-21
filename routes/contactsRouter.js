@@ -9,7 +9,7 @@ import {
 import { idParamSchema } from '../schemas/paramsSchemas.js';
 import isEmptyBody from '../middlewares/isEmptyBody.js';
 import authMiddleware from '../middlewares/authMiddleware.js';
-import upload from '../middlewares/upload.js';
+import handleUpload from '../middlewares/handleUpload.js';
 
 const contactsRouter = express.Router();
 contactsRouter.use(authMiddleware);
@@ -22,7 +22,7 @@ contactsRouter.get(
 );
 contactsRouter.post(
   '/',
-  upload.single('avatars'),
+  handleUpload,
   isEmptyBody,
   validateBody(createContactSchema),
   contactsController.createContact
