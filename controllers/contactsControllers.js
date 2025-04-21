@@ -1,7 +1,11 @@
+import fs from 'fs/promises';
+import path from 'path';
 import * as contactsService from '../services/contactsServices.js';
 import HttpError from '../helpers/HttpError.js';
 import ctrlWrapper from '../decorators/ctrlWrapper.js';
 import checkNotFound from '../helpers/checkNotFound.js';
+
+const avatarsDir = path.resolve('public', 'avatars');
 
 const getAllContacts = async (req, res) => {
   const userId = req.user.id;
@@ -17,8 +21,19 @@ const getOneContact = async (req, res) => {
 };
 
 const createContact = async (req, res) => {
+  let avatarURL = null;
+  if (req.file) {
+    const { path: oldPath, filename } = req.file;
+    const newPath = path.join(avatarsDir, filename);
+    await fs.rename(oldPath, newPath);
+    avatarURL = path.join('public', 'avatars', filename);
+  }
   const userId = req.user.id;
-  const data = await contactsService.addContact({ ...req.body, owner: userId });
+  const data = await contactsService.addContact({
+    ...req.body,
+    avatarURL,
+    owner: userId,
+  });
   res.status(201).json(data);
 };
 
