@@ -23,6 +23,7 @@ export default function handleUpload(req, res, next) {
       if (err) {
         return next(err);
       }
+
       next();
     });
   }

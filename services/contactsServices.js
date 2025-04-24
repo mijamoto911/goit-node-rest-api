@@ -8,7 +8,14 @@ export const listContacts = (owner) =>
 export const getContactById = (id, owner) =>
   Contact.findOne({ where: { id, owner } });
 
+export const getContactByEmail = (email, owner) => {
+  return Contact.findOne({ where: { email, owner } });
+};
+
 export const addContact = (data) => Contact.create(data);
+export const createContact = (data, owner) => {
+  return addContact({ ...data, owner });
+};
 
 export const updateContact = async (id, data, owner) => {
   const contact = await getContactById(id, owner);
