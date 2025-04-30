@@ -6,6 +6,11 @@ export const authSignupSchema = Joi.object({
   password: Joi.string().pattern(passwordRegexp).required(),
 });
 
+export const authVerifySchema = Joi.object({
+  email: Joi.string().pattern(emailRegexp).required(),
+  verificationToken: Joi.string().required(),
+});
+
 export const authSigninSchema = Joi.object({
   email: Joi.string().pattern(emailRegexp).required(),
   password: Joi.string().pattern(passwordRegexp).required(),

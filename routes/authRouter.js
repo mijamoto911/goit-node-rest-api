@@ -6,7 +6,11 @@ import authControllers from '../controllers/authControllers.js';
 
 import { validateBody } from '../helpers/validateBody.js';
 
-import { authSignupSchema, authSigninSchema } from '../schemas/authSchemas.js';
+import {
+  authSignupSchema,
+  authSigninSchema,
+  authVerifySchema,
+} from '../schemas/authSchemas.js';
 
 const authRouter = express.Router();
 
@@ -20,6 +24,12 @@ authRouter.post(
   '/login',
   validateBody(authSigninSchema),
   authControllers.signinController
+);
+authRouter.get('/verify/:verificationCode', authControllers.verifyController);
+authRouter.post(
+  '/verify',
+  validateBody(authVerifySchema),
+  authControllers.resendVerifyEmailController
 );
 
 authRouter.get('/current', authMiddleware, authControllers.getCurrentUser);

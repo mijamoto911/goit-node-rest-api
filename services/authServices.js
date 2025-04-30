@@ -1,10 +1,19 @@
 import bcrypt from 'bcrypt';
-
+import { nanoid } from 'nanoid';
 import User from '../db/models/users.js';
 
 import HttpError from '../helpers/HttpError.js';
 
 import { generateToken } from '../helpers/jwt.js';
+import sendEmail from '../helpers/sendEmail.js';
+
+const { APP_DOMAIN } = process.env;
+
+const createVerifyEmail = (email, verificationCode) => ({
+  to: email,
+  subject: 'Verify email',
+  html: `<a href="${APP_DOMAIN}/api/auth/verify/${verificationCode}" target="_blank">Click verify email</a>`,
+});
 
 export const findUser = (query) =>
   User.findOne({
@@ -13,38 +22,76 @@ export const findUser = (query) =>
 
 export const signupUser = async (data) => {
   const { email, password } = data;
+  const user = await User.findOne({
+    where: {
+      email,
+    },
+  });
 
-  const userExists = await User.findOne({ where: { email } });
-  if (userExists) {
+  if (user) {
     throw HttpError(409, 'Email already in use');
   }
 
   const hashPassword = await bcrypt.hash(password, 10);
 
+  const verificationCode = nanoid();
+
   const newUser = await User.create({
-    email,
+    ...data,
     password: hashPassword,
+    verificationCode,
   });
 
-  const token = generateToken({ id: newUser.id });
+  const verifyEmail = createVerifyEmail(email, verificationCode);
 
-  await newUser.update({ token });
+  await sendEmail(verifyEmail);
 
   return {
     user: {
       email: newUser.email,
-      subscription: newUser.subscription,
+      verify: newUser.verify,
+      avatarURL: newUser.avatarURL,
     },
-    token,
+    token: null,
   };
+};
+
+export const verifyUser = async (verificationCode) => {
+  const user = await findUser({ verificationCode });
+  if (!user) {
+    throw HttpError(404, 'Email not found or user already verified');
+  }
+
+  await user.update({ verificationCode: null, verify: true });
+};
+export const resendVerifyEmail = async (email) => {
+  const user = await findUser({ email });
+  if (!user) {
+    throw HttpError(404, 'Email not found');
+  }
+  if (user.verify) {
+    throw HttpError(401, 'Email already verify');
+  }
+
+  const verifyEmail = createVerifyEmail(email, user.verificationCode);
+
+  await sendEmail(verifyEmail);
 };
 
 export const signinUser = async (data) => {
   const { email, password } = data;
-  const user = await User.findOne({ where: { email } });
+  const user = await User.findOne({
+    where: {
+      email,
+    },
+  });
 
   if (!user) {
     throw HttpError(401, 'Email or password invalid');
+  }
+
+  if (!user.verify) {
+    throw HttpError(401, 'Email not verified');
   }
 
   const passwordCompare = await bcrypt.compare(password, user.password);
@@ -52,15 +99,16 @@ export const signinUser = async (data) => {
     throw HttpError(401, 'Email or password invalid');
   }
 
-  const token = generateToken({ id: user.id });
+  const payload = {
+    email,
+  };
+
+  const token = generateToken(payload);
+
   await user.update({ token });
 
   return {
     token,
-    user: {
-      email: user.email,
-      subscription: user.subscription,
-    },
   };
 };
 
