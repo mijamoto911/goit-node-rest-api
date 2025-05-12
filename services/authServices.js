@@ -1,4 +1,5 @@
 import bcrypt from 'bcrypt';
+import gravatar from 'gravatar';
 
 import User from '../db/models/users.js';
 
@@ -20,10 +21,12 @@ export const signupUser = async (data) => {
   }
 
   const hashPassword = await bcrypt.hash(password, 10);
+  const avatarURL = gravatar.url(email, { s: '250', d: 'retro' }, true);
 
   const newUser = await User.create({
     email,
     password: hashPassword,
+    avatarURL,
   });
 
   const token = generateToken({ id: newUser.id });
@@ -33,6 +36,7 @@ export const signupUser = async (data) => {
   return {
     user: {
       email: newUser.email,
+      avatarURL: newUser.avatarURL,
       subscription: newUser.subscription,
     },
     token,
