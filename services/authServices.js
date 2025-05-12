@@ -1,10 +1,8 @@
 import bcrypt from 'bcrypt';
 import gravatar from 'gravatar';
-
+import { nanoid } from 'nanoid';
 import User from '../db/models/users.js';
-
 import HttpError from '../helpers/HttpError.js';
-
 import { generateToken } from '../helpers/jwt.js';
 
 export const findUser = (query) =>
@@ -14,32 +12,34 @@ export const findUser = (query) =>
 
 export const signupUser = async (data) => {
   const { email, password } = data;
+  const user = await User.findOne({ where: { email } });
 
-  const userExists = await User.findOne({ where: { email } });
-  if (userExists) {
+  if (user) {
     throw HttpError(409, 'Email already in use');
   }
 
   const hashPassword = await bcrypt.hash(password, 10);
   const avatarURL = gravatar.url(email, { s: '250', d: 'retro' }, true);
+  const verificationCode = nanoid();
 
   const newUser = await User.create({
-    email,
+    ...data,
     password: hashPassword,
     avatarURL,
+    verificationCode,
   });
 
-  const token = generateToken({ id: newUser.id });
-
-  await newUser.update({ token });
+  const verifyEmail = createVerifyEmail(email, verificationCode);
+  await sendEmail(verifyEmail);
 
   return {
     user: {
       email: newUser.email,
       avatarURL: newUser.avatarURL,
       subscription: newUser.subscription,
+      verify: newUser.verify,
     },
-    token,
+    token: null,
   };
 };
 

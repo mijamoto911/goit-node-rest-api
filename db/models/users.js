@@ -1,6 +1,6 @@
 import { DataTypes } from 'sequelize';
 import sequelize from '../sequelize.js';
-import { emailRegexp, passwordRegexp } from '../../constants/auth.js';
+import { emailRegexp } from '../../constants/auth.js';
 
 const User = sequelize.define('user', {
   password: {
@@ -30,6 +30,14 @@ const User = sequelize.define('user', {
   avatarURL: {
     type: DataTypes.STRING,
     allowNull: false,
+  },
+  verify: {
+    type: DataTypes.BOOLEAN,
+    defaultValue: false,
+  },
+  verificationCode: {
+    type: DataTypes.STRING,
+    allowNull: true,
   },
 });
 
