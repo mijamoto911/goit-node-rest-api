@@ -3,13 +3,6 @@ import sequelize from '../sequelize.js';
 import { emailRegexp } from '../../constants/auth.js';
 
 const User = sequelize.define('user', {
-  password: {
-    type: DataTypes.STRING,
-    allowNull: false,
-    validate: {
-      len: [8, 100],
-    },
-  },
   email: {
     type: DataTypes.STRING,
     allowNull: false,
@@ -18,14 +11,20 @@ const User = sequelize.define('user', {
       is: emailRegexp,
     },
   },
-  subscription: {
-    type: DataTypes.ENUM,
-    values: ['starter', 'pro', 'business'],
-    defaultValue: 'starter',
+  verify: {
+    type: DataTypes.BOOLEAN,
+    defaultValue: false,
+  },
+  verificationCode: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
+  password: {
+    type: DataTypes.STRING,
+    allowNull: false,
   },
   token: {
     type: DataTypes.STRING,
-    defaultValue: null,
   },
   avatarURL: {
     type: DataTypes.STRING,
@@ -41,6 +40,6 @@ const User = sequelize.define('user', {
   },
 });
 
-// User.sync();
+//User.sync({ force: true });
 
 export default User;
