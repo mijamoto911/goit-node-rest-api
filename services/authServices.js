@@ -26,15 +26,12 @@ export const signupUser = async (data) => {
 
   const user = await User.findOne({ where: { email } });
 
-
   if (user) {
     throw HttpError(409, 'Email already in use');
   }
 
   const hashPassword = await bcrypt.hash(password, 10);
   const avatarURL = gravatar.url(email, { s: '250', d: 'retro' }, true);
-  const verificationCode = nanoid();
-
   const verificationCode = nanoid();
 
   const newUser = await User.create({
@@ -54,7 +51,6 @@ export const signupUser = async (data) => {
       avatarURL: newUser.avatarURL,
       subscription: newUser.subscription,
       verify: newUser.verify,
-
     },
     token: null,
   };
