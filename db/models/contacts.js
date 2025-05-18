@@ -40,6 +40,6 @@ const Contact = sequelize.define('contact', {
 User.hasMany(Contact, { foreignKey: 'owner' });
 Contact.belongsTo(User, { foreignKey: 'owner' });
 
-//Contact.sync({ alter: true });
+// Contact.sync({ alter: true });
 
 export default Contact;

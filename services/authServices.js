@@ -1,7 +1,5 @@
 import bcrypt from 'bcrypt';
-
 import gravatar from 'gravatar';
-
 import { nanoid } from 'nanoid';
 import User from '../db/models/users.js';
 import HttpError from '../helpers/HttpError.js';
@@ -13,7 +11,7 @@ const { APP_DOMAIN } = process.env;
 const createVerifyEmail = (email, verificationCode) => ({
   to: email,
   subject: 'Verify email',
-  html: `<a href="${APP_DOMAIN}/api/auth/verify/${verificationCode}" target="_blank">Click verify email</a>`,
+  html: `<a href="${APP_DOMAIN}/api/auth/verify/${verificationCode}" target="_blank">Click to verify email</a>`,
 });
 
 export const findUser = (query) =>
@@ -42,7 +40,6 @@ export const signupUser = async (data) => {
   });
 
   const verifyEmail = createVerifyEmail(email, verificationCode);
-
   await sendEmail(verifyEmail);
 
   return {
@@ -58,34 +55,36 @@ export const signupUser = async (data) => {
 
 export const verifyUser = async (verificationCode) => {
   const user = await findUser({ verificationCode });
+
   if (!user) {
-    throw HttpError(404, 'Email not found or user already verified');
+    throw HttpError(404, 'Email not found or already verified');
   }
 
-  await user.update({ verificationCode: null, verify: true });
+  await user.update({
+    verificationCode: null,
+    verify: true,
+  });
 };
+
 export const resendVerifyEmail = async (email) => {
   const user = await findUser({ email });
+
   if (!user) {
     throw HttpError(404, 'Email not found');
   }
+
   if (user.verify) {
-    throw HttpError(401, 'Email already verify');
+    throw HttpError(401, 'Email already verified');
   }
 
   const verifyEmail = createVerifyEmail(email, user.verificationCode);
-
   await sendEmail(verifyEmail);
 };
 
 export const signinUser = async (data) => {
   const { email, password } = data;
-  const user = await User.findOne({
-    where: {
-      email,
-    },
-  });
 
+  const user = await User.findOne({ where: { email } });
   if (!user) {
     throw HttpError(401, 'Email or password invalid');
   }
@@ -99,16 +98,15 @@ export const signinUser = async (data) => {
     throw HttpError(401, 'Email or password invalid');
   }
 
-  const payload = {
-    email,
-  };
-
-  const token = generateToken(payload);
-
+  const token = generateToken({ id: user.id });
   await user.update({ token });
 
   return {
     token,
+    user: {
+      email: user.email,
+      subscription: user.subscription,
+    },
   };
 };
 

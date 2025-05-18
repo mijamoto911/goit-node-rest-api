@@ -6,11 +6,12 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import contactsRouter from './routes/contactsRouter.js';
 import authRouter from './routes/authRouter.js';
-
-const app = express();
+import sequelize from './db/sequelize.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+
+const app = express();
 
 app.use(morgan('tiny'));
 app.use(cors());
@@ -32,6 +33,16 @@ app.use((err, req, res, next) => {
 
 const { PORT = 3000 } = process.env;
 
-app.listen(PORT, () => {
-  console.log(`✅ Server is running. Use our API on port: ${PORT}`);
-});
+try {
+  await sequelize.authenticate();
+  console.log('✅ Successfully connected to the database');
+
+  await sequelize.sync();
+
+  app.listen(PORT, () => {
+    console.log(`🚀 Server is running. Use our API on port: ${PORT}`);
+  });
+} catch (error) {
+  console.error('❌ DB connection error:', error.message);
+  process.exit(1);
+}
