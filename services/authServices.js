@@ -1,10 +1,9 @@
 import bcrypt from 'bcrypt';
 import gravatar from 'gravatar';
-import { nanoid } from 'nanoid';
 import User from '../db/models/users.js';
 import HttpError from '../helpers/HttpError.js';
 import { generateToken } from '../helpers/jwt.js';
-
+import { nanoid } from 'nanoid';
 export const findUser = (query) =>
   User.findOne({
     where: query,
@@ -28,9 +27,6 @@ export const signupUser = async (data) => {
     avatarURL,
     verificationCode,
   });
-
-  const verifyEmail = createVerifyEmail(email, verificationCode);
-  await sendEmail(verifyEmail);
 
   return {
     user: {
