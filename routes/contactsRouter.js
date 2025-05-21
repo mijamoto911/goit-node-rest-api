@@ -1,7 +1,7 @@
 import express from 'express';
 import contactsController from '../controllers/contactsControllers.js';
 
-import { validateBody, validateParam } from '../helpers/validateBody.js';
+import { validateBody, validateParam } from '../decorators/validateBody.js';
 import {
   createContactSchema,
   updateContactSchema,
@@ -9,7 +9,7 @@ import {
 import { idParamSchema } from '../schemas/paramsSchemas.js';
 import isEmptyBody from '../middlewares/isEmptyBody.js';
 import authMiddleware from '../middlewares/authMiddleware.js';
-import handleUpload from '../middlewares/handleUpload.js';
+import upload from '../middlewares/upload.js';
 
 const contactsRouter = express.Router();
 contactsRouter.use(authMiddleware);
@@ -22,7 +22,7 @@ contactsRouter.get(
 );
 contactsRouter.post(
   '/',
-  handleUpload,
+  upload.single('avatar'),
   isEmptyBody,
   validateBody(createContactSchema),
   contactsController.createContact

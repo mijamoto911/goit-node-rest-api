@@ -17,7 +17,7 @@ const Contact = sequelize.define('contact', {
     allowNull: false,
     unique: true,
   },
-  phoneNumber: {
+  phone: {
     type: DataTypes.STRING,
     allowNull: false,
     unique: true,

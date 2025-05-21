@@ -5,7 +5,6 @@ import User from '../db/models/users.js';
 import HttpError from '../helpers/HttpError.js';
 import { generateToken } from '../helpers/jwt.js';
 import sendEmail from '../helpers/sendEmail.js';
-
 const { APP_DOMAIN } = process.env;
 
 const createVerifyEmail = (email, verificationCode) => ({
@@ -23,10 +22,7 @@ export const signupUser = async (data) => {
   const { email, password } = data;
 
   const user = await User.findOne({ where: { email } });
-
-  if (user) {
-    throw HttpError(409, 'Email already in use');
-  }
+  if (user) throw HttpError(409, 'Email already in use');
 
   const hashPassword = await bcrypt.hash(password, 10);
   const avatarURL = gravatar.url(email, { s: '250', d: 'retro' }, true);
@@ -40,7 +36,9 @@ export const signupUser = async (data) => {
   });
 
   const verifyEmail = createVerifyEmail(email, verificationCode);
-  await sendEmail(verifyEmail);
+
+  const token = generateToken({ id: newUser.id });
+  await newUser.update({ token });
 
   return {
     user: {
@@ -49,7 +47,7 @@ export const signupUser = async (data) => {
       subscription: newUser.subscription,
       verify: newUser.verify,
     },
-    token: null,
+    token,
   };
 };
 

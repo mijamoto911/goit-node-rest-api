@@ -16,7 +16,7 @@ const nodemailerConfig = {
 const transport = nodemailer.createTransport(nodemailerConfig);
 
 const sendEmail = (data) => {
-  const email = { ...data, from: `Mijamoto ${BREVO_EMAIL}` };
+  const email = { ...data, from: `Mijamoto <${BREVO_EMAIL}>` };
   return transport.sendMail(email);
 };
 

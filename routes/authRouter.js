@@ -1,10 +1,11 @@
 import express from 'express';
 
 import authMiddleware from '../middlewares/authMiddleware.js';
+import upload from '../middlewares/upload.js';
 
 import authControllers from '../controllers/authControllers.js';
 
-import { validateBody } from '../helpers/validateBody.js';
+import { validateBody } from '../decorators/validateBody.js';
 
 import {
   authSignupSchema,
@@ -14,6 +15,15 @@ import {
 
 const authRouter = express.Router();
 
+authRouter.get('/verify/:verificationCode', authControllers.verifyController);
+authRouter.get('/current', authMiddleware, authControllers.getCurrentUser);
+authRouter.post(
+  '/verify',
+  validateBody(authVerifySchema),
+  authControllers.resendVerifyEmailController
+);
+
+authRouter.post('/logout', authMiddleware, authControllers.logoutController);
 authRouter.post(
   '/register',
   validateBody(authSignupSchema),
@@ -25,15 +35,11 @@ authRouter.post(
   validateBody(authSigninSchema),
   authControllers.signinController
 );
-authRouter.get('/verify/:verificationCode', authControllers.verifyController);
-authRouter.post(
-  '/verify',
-  validateBody(authVerifySchema),
-  authControllers.resendVerifyEmailController
+authRouter.patch(
+  '/avatars',
+  authMiddleware,
+  upload.single('avatar'),
+  authControllers.updateAvatar
 );
-
-authRouter.get('/current', authMiddleware, authControllers.getCurrentUser);
-
-authRouter.post('/logout', authMiddleware, authControllers.logoutController);
 
 export default authRouter;
